@@ -19,7 +19,7 @@ func main(){
 				Required: true,
 			},
 			&cli.StringFlag{
-				Name: "level",
+				Name: "logLevel",
 				Aliases: []string{"l"},
 				Usage: "Filter by log's level",
 			},

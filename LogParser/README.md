@@ -1,38 +1,26 @@
-## Zadanie: Log Parser CLI z własnym interfejsem
-Zrobisz idiomatyczną, testowalną aplikację do filtrowania i analizy logów.
-W pełni modularną, z interfejsami i testami. ✨
+## Log Parser CLI
 
-### Struktura projektu
- main.go – wejście CLI
+A modular and idiomatic Go CLI tool for parsing and filtering JSONL logs.
 
- parser.go – logika parsowania logów
+## Features
 
- filter.go – logika filtrowania + Twój własny interfejs
+- Filter logs by attributes like `level`, `service`, etc.
+- Supports custom `LogFilter` and `MultiFilter` interfaces
+- Counts unique values per field (e.g., `EC2: 123`)
+- Saves filtered logs as JSON
+- Handles stdin input and error cases idiomatically
 
- types.go – definicje struktur LogEntry, LogFilter
+## Usage
 
- parser_test.go, filter_test.go – testy jednostkowe
+```bash
+go run main.go --file logs.jsonl --level ERROR --service EC2
+```
 
- go.mod – moduł Go
+## TO DO:
+- Tests :c
 
-### To Do
- Wypisz statystyki (count per service, count per level)
+## Notes:
 
- Zapisz dane w formacie json
-
-### Testy
- Przetestuj FilterLogs() z różnymi filtrami
-
- Przetestuj parser logów na poprawnych i błędnych liniach JSON
-
- Użyj strings.NewReader i bytes.Buffer do testowania io.Reader/io.Writer
-
-## Plus
- Zaimplementuj interfejs MultiFilter – który przyjmuje wiele filtrów naraz
-
- Obsłuż stdin jako źródło danych (os.Stdin)
-
-## Wywołania CLI:
 ```
 go run main.go --file aws_style_logs.jsonl --level ERROR --service EC2
 

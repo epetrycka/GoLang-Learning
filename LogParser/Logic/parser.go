@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"os"
 	"log"
-	"strconv"
+	"os"
 	"github.com/urfave/cli/v2"
 )
 
 type LogEntry map[string]interface{}
+
+var Attributes = map[string]string{
+	"logLevel" : "",
+	"service" : "",
+}
 
 func Parse(c *cli.Context) error {
 	var logEntryList []LogEntry
@@ -38,25 +42,21 @@ func Parse(c *cli.Context) error {
 		return fmt.Errorf("error during scanning occurred: %w", err)
 	}
 
-	level := c.String("level")
-	service := c.String("service")
-	if level != ""{
-		var filter LogFilter = &LevelFilter{logLevel: level}
-		SaveFilterLogs(logEntryList, filter)
-	} else if service != ""{
-		var filter LogFilter = &ServiceFilter{Service: service}
-		SaveFilterLogs(logEntryList, filter)
-	} else {
-		var filter LogFilter = nil
-		SaveFilterLogs(logEntryList, filter)
+	for attribute, _ := range Attributes{
+		value := c.String(attribute)
+		if value != ""{
+			Attributes[attribute] = value
+		}
 	}
-	
+
+	SaveFilterLogs(logEntryList)
+
 	return nil
 }
 
-func SaveFilterLogs(entries []LogEntry, filter LogFilter) error{
+func SaveFilterLogs(entries []LogEntry) error{
 	var filterEntries []LogEntry
-	filterEntries, err := FilterLogs(entries, filter)
+	filterEntries, err := FilterLogs(entries)
 
 	if err != nil{
 		return fmt.Errorf("error occurred during filtering logs: %w", err)
@@ -72,24 +72,15 @@ func SaveFilterLogs(entries []LogEntry, filter LogFilter) error{
 
 	writer := bufio.NewWriter(file)
 
-	for key, value := range filterEntries {
-		_, err := writer.WriteString("LogEntry: " + strconv.Itoa(key) + "\n")
+	for _, entry := range filterEntries {
+		jsonBytes, err := json.Marshal(entry)
 		if err != nil {
-			fmt.Println("error occurred during saving first line:", err)
-			return err
+			return fmt.Errorf("error marshalling JSON: %w", err)
 		}
 
-		for subKey, subValue := range value {
-			_, err := writer.WriteString(fmt.Sprintf("  %s: %v\n", subKey, subValue))
-			if err != nil {
-				fmt.Println("error occurred during saving description:", err)
-				return err
-			}
-		}
-		_, err = writer.WriteString("---\n")
+		_, err = writer.WriteString(string(jsonBytes) + "\n")
 		if err != nil {
-			fmt.Println("error occurred during saving delimiter:", err)
-			return err
+			return fmt.Errorf("error writing line: %w", err)
 		}
 	}
 
