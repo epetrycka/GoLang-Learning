@@ -4,15 +4,17 @@ A modular and idiomatic Go CLI tool for parsing and filtering JSONL logs.
 
 ## Features
 
-- Filter logs by attributes like `level`, `service`, etc.
-- Supports custom `LogFilter` and `MultiFilter` interfaces
-- Counts unique values per field (e.g., `EC2: 123`)
-- Saves filtered logs as JSON
-- Handles stdin input and error cases idiomatically
+- Parses JSON logs line by line from a given file (one JSON object per line)
+- Works regardless of the structure of each JSON log entry
+- Stores all logs as a list of dynamic entries (slice)
+- Filters logs by multiple attributes at once (e.g., `--level ERROR --service EC2`)
+- Stores filters globally for easy access across the app
+- Calculates metrics: counts unique values for each filtered attribute
+- Saves filtered logs to a JSON file
 
 ## Usage
 
-```bash
+```
 go run main.go --file logs.jsonl --level ERROR --service EC2
 ```
 
